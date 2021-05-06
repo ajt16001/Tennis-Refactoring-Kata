@@ -1,3 +1,4 @@
+
 namespace Tennis
 {
     public class Player
@@ -25,5 +26,17 @@ namespace Tennis
             return Name;
         }
 
+
+        public string PlayerScoreString()
+        {
+            return Score switch
+            {
+                0 => "Love",
+                1 => "Fifteen",
+                2 => "Thirty",
+                3 => "Forty",
+                _ => ""
+            };
+        }
     }
 }
