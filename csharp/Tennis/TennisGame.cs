@@ -1,82 +1,67 @@
+using System;
+
 namespace Tennis
 {
-    class TennisGame : ITennisGame
+    internal class TennisGame: ITennisGame
     {
-        private int m_score1 = 0;
-        private int m_score2 = 0;
-        private string player1Name;
-        private string player2Name;
+        public Player PlayerOne { get; set; }
+        public Player PlayerTwo { get; set; }
+        private string GameScore { get; set; }
+
 
         public TennisGame(string player1Name, string player2Name)
         {
-            this.player1Name = player1Name;
-            this.player2Name = player2Name;
+            PlayerOne = new Player(player1Name);
+            PlayerTwo = new Player(player2Name);
+            GameScore = "Love-All";
         }
 
-        public void WonPoint(string playerName)
+        public string PointScored(Player player)
         {
-            if (playerName == "player1")
-                m_score1 += 1;
-            else
-                m_score2 += 1;
+            player.UpdateScore();
+            GameScore = SetGameScore();
+            return GameScore;
         }
 
-        public string GetScore()
+        public string GetGameScore()
         {
-            string score = "";
-            var tempScore = 0;
-            if (m_score1 == m_score2)
-            {
-                switch (m_score1)
-                {
-                    case 0:
-                        score = "Love-All";
-                        break;
-                    case 1:
-                        score = "Fifteen-All";
-                        break;
-                    case 2:
-                        score = "Thirty-All";
-                        break;
-                    default:
-                        score = "Deuce";
-                        break;
-
-                }
-            }
-            else if (m_score1 >= 4 || m_score2 >= 4)
-            {
-                var minusResult = m_score1 - m_score2;
-                if (minusResult == 1) score = "Advantage player1";
-                else if (minusResult == -1) score = "Advantage player2";
-                else if (minusResult >= 2) score = "Win for player1";
-                else score = "Win for player2";
-            }
-            else
-            {
-                for (var i = 1; i < 3; i++)
-                {
-                    if (i == 1) tempScore = m_score1;
-                    else { score += "-"; tempScore = m_score2; }
-                    switch (tempScore)
-                    {
-                        case 0:
-                            score += "Love";
-                            break;
-                        case 1:
-                            score += "Fifteen";
-                            break;
-                        case 2:
-                            score += "Thirty";
-                            break;
-                        case 3:
-                            score += "Forty";
-                            break;
-                    }
-                }
-            }
-            return score;
+            return GameScore;
         }
-    }
+
+        private string SetGameScore()
+        {
+            if (PlayerOne.GetScore() - PlayerTwo.GetScore() == 0) return Tie(PlayerOne.GetScore());
+            if (GameWon()) return $"Win for {LeadPlayer()}";
+            if (PlayerHasAdvantage()) return $"Advantage {LeadPlayer()}";
+            return $"{PlayerOne.PlayerScoreString()}-{PlayerTwo.PlayerScoreString()}";
+        }
+
+        private bool PlayerHasAdvantage()
+        {
+            return PlayerOne.GetScore() >= 4 || PlayerTwo.GetScore() >= 4;
+        }
+        
+        private bool GameWon()
+        {
+            return PlayerHasAdvantage() && Math.Abs(PlayerOne.GetScore() - PlayerTwo.GetScore()) >= 2;
+        }
+
+        private string Tie(int score)
+        {
+            return score switch
+            {
+                0 => "Love-All",
+                1 => "Fifteen-All",
+                2 => "Thirty-All",
+                _ => "Deuce"
+            };
+        }
+
+        private string LeadPlayer()
+        {
+            int current = PlayerOne.GetScore() - PlayerTwo.GetScore();
+            return current > 0 ? PlayerOne.GetName() : PlayerTwo.GetName();
+        }
+    }  
 }
 
